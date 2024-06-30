@@ -1,4 +1,11 @@
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0  # Use the latest version
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+
   - repo: https://github.com/dnephin/pre-commit-golang
     rev: v0.5.1
     hooks:
@@ -13,4 +20,4 @@ repos:
         name: Check bundle packages
         entry: .scripts/pre-commit-bundle-check.sh
         language: script
-        files: ^bin/*
+        files: ^bin/
