@@ -6,12 +6,14 @@ import (
 
 	artifactregistry "cloud.google.com/go/artifactregistry/apiv1"
 	run "cloud.google.com/go/run/apiv2"
+	iam "google.golang.org/api/iam/v1"
 	"google.golang.org/api/option"
 )
 
 type Client struct {
 	run              *run.ServicesClient
 	artifactRegistry *artifactregistry.Client
+	iam              *iam.Service
 	project          string
 	region           string
 	credentialsFile  string
@@ -55,6 +57,11 @@ func (c *Client) setClients() error {
 	}
 
 	c.artifactRegistry, err = artifactregistry.NewClient(c.ctx, clientOptions...)
+	if err != nil {
+		return err
+	}
+
+	c.iam, err = iam.NewService(c.ctx, clientOptions...)
 	if err != nil {
 		return err
 	}

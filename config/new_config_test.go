@@ -31,16 +31,18 @@ apps:
 `
 
 	err := c.parseYamlFile([]byte(data))
+
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(c.Apps))
 	assert.Equal(t, "app1", c.Apps[0].Name)
 	assert.False(t, c.Apps[0].Public)
 	assert.Equal(t, "test", c.Apps[0].Image)
 	assert.Equal(t, "v1", c.Apps[0].Version)
-	assert.Equal(t, 1, c.Apps[0].Scaling.Min)
-	assert.Equal(t, 10, c.Apps[0].Scaling.Max)
-	assert.Equal(t, 5, c.Apps[0].Scaling.Concurrency)
-	assert.Equal(t, c.Apps[0].fullImageURL, fmt.Sprintf("%s-docker.pkg.dev/%s/%s/%s", c.Region, c.Project, c.ArtifactRegistryName, c.Apps[0].Image))
+	assert.Equal(t, int32(1), c.Apps[0].Scaling.Min)
+	assert.Equal(t, int32(10), c.Apps[0].Scaling.Max)
+	assert.Equal(t, int32(5), c.Apps[0].Scaling.Concurrency)
+	assert.Equal(t, c.Apps[0].ImageURL, fmt.Sprintf("%s-docker.pkg.dev/%s/%s/%s", c.Region, c.Project, c.ArtifactRegistryName, c.Apps[0].Image))
+	assert.Equal(t, "app1-v1", c.Apps[0].ServiceName)
 
 	assert.Equal(t, "app2", c.Apps[1].Name)
 	assert.True(t, c.Apps[1].Public)

@@ -3,83 +3,39 @@ package deploy
 import (
 	"fmt"
 
-	"github.com/thoughtgears/streamlit-hoster/config"
+	"github.com/thoughtgears/streamlitter/config"
 
 	"cloud.google.com/go/run/apiv2/runpb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (c *Client) DeployApplication(appName, version string, public bool) {
-	switch c.serviceExists(appName) {
-	case true:
-		// update service
-	case false:
-		// create service
+func (c *Client) DeployApplication(project, region string, app config.AppConfig) (string, error) {
+	exists, err := c.serviceExists(project, region, app.ServiceName)
+	if err != nil {
+		return "", fmt.Errorf("serviceExists(): %w", err)
 	}
+
+	switch exists {
+	case true:
+		fmt.Println("Service exists, updating service")
+	case false:
+		fmt.Println("Service does not exist, creating service")
+	}
+
+	return "", nil
 }
 
-func (c *Client) serviceExists(serviceName string) bool {
-	req := &runpb.GetServiceRequest{Name: serviceName}
+func (c *Client) serviceExists(project, region, serviceName string) (bool, error) {
+	req := &runpb.GetServiceRequest{Name: fmt.Sprintf("projects/%s/locations/%s/services/%s", project, region, serviceName)}
 	_, err := c.run.GetService(c.ctx, req)
 	if err != nil {
 		st, ok := status.FromError(err)
 		if ok && st.Code() == codes.NotFound {
-			return false
+			return false, nil
 		}
+		return false, fmt.Errorf("GetService(): %w", err)
 	}
 
-	return true
-}
-
-func (c *Client) createService(app config.AppConfig) (string, error) {
-	var service = app.Name
-	if app.Version != "" {
-		service = fmt.Sprintf("%s-%s", app.Name, app.Version)
-	}
-
-	req := &runpb.CreateServiceRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", c.project, c.region),
-		Service: &runpb.Service{
-			Name:        service,
-			Description: app.Description,
-			Labels: map[string]string{
-				"streamlitter": "true",
-			},
-			Ingress: runpb.IngressTraffic_INGRESS_TRAFFIC_ALL,
-			Scaling: &runpb.ServiceScaling{
-				MinInstanceCount: app.Scaling.Min,
-			},
-			Template: &runpb.RevisionTemplate{
-				Labels:                        nil,
-				Annotations:                   nil,
-				Scaling:                       nil,
-				VpcAccess:                     nil,
-				Timeout:                       nil,
-				ServiceAccount:                "",
-				Containers:                    nil,
-				Volumes:                       nil,
-				ExecutionEnvironment:          0,
-				EncryptionKey:                 "",
-				MaxInstanceRequestConcurrency: 0,
-				SessionAffinity:               false,
-				HealthCheckDisabled:           false,
-			},
-		},
-		ServiceId: service,
-	}
-
-	op, err := c.run.CreateService(c.ctx, req)
-	if err != nil {
-		return "", fmt.Errorf("run.CreateService(): %w", err)
-	}
-
-	resp, err := op.Wait(c.ctx)
-	if err != nil {
-		return "", fmt.Errorf("op.Wait(): %w", err)
-	}
-
-	fmt.Println(resp.Template)
-
-	return resp.Uri, nil
+	return true, nil
 }

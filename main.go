@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/thoughtgears/streamlit-hoster/config"
-	"github.com/thoughtgears/streamlit-hoster/pkg/deploy"
+	"github.com/thoughtgears/streamlitter/config"
+	"github.com/thoughtgears/streamlitter/pkg/deploy"
 )
 
 var (
@@ -61,7 +61,9 @@ func main() {
 		fmt.Printf("  Project: %s\n  Region: %s\n  Repo: %s\n", cfg.Project, cfg.Region, cfg.ArtifactRegistryName)
 		fmt.Println("App Configs:")
 		for _, app := range cfg.Apps {
-			fmt.Printf("  Name: %s\n  Public App: %v\n\n", app.Name, app.Public)
+			fmt.Printf("  Name: %s\n  Public App: %v\n", app.Name, app.Public)
+			fmt.Printf("  Image: %s\n  Version: %s\n", app.Image, app.Version)
+			fmt.Printf("  ImageURL: %s\n  ServiceName: %s\n\n", app.ImageURL, app.ServiceName)
 		}
 	}
 
@@ -75,6 +77,8 @@ func main() {
 	}
 
 	for _, app := range cfg.Apps {
-		clients.DeployApplication(app.Name, app.Version, app.Public)
+		if _, err := clients.DeployApplication(project, region, app); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
