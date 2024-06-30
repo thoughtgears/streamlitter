@@ -35,9 +35,9 @@ func (c *Client) createService(app config.AppConfig) (string, error) {
 	}
 
 	req := &runpb.CreateServiceRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", c.project, c.region),
+		Parent:    fmt.Sprintf("projects/%s/locations/%s", c.project, c.region),
+		ServiceId: service,
 		Service: &runpb.Service{
-			Name:        service,
 			Description: app.Description,
 			Labels: map[string]string{
 				"streamlitter": "true",
@@ -68,7 +68,6 @@ func (c *Client) createService(app config.AppConfig) (string, error) {
 				HealthCheckDisabled:           false,
 			},
 		},
-		ServiceId: service,
 	}
 
 	op, err := c.run.CreateService(c.ctx, req)
@@ -87,6 +86,17 @@ func (c *Client) createService(app config.AppConfig) (string, error) {
 }
 
 func (c *Client) createServiceAccount(appName string) (string, error) {
+	serviceAccountsList, err := c.iam.Projects.ServiceAccounts.List(fmt.Sprintf("projects/%s", c.project)).Do()
+	if err != nil {
+		return "", fmt.Errorf("serviceAccounts.List(): %w", err)
+	}
+
+	for _, account := range serviceAccountsList.Accounts {
+		if account.DisplayName == fmt.Sprintf("[RUN] %s", strings.ToTitle(appName)) {
+			return account.Email, nil
+		}
+	}
+
 	req := &iam.CreateServiceAccountRequest{
 		AccountId: fmt.Sprintf("run-%s", appName),
 		ServiceAccount: &iam.ServiceAccount{

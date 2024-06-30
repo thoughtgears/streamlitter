@@ -77,8 +77,10 @@ func main() {
 	}
 
 	for _, app := range cfg.Apps {
-		if _, err := clients.DeployApplication(project, region, app); err != nil {
+		uri, err := clients.DeployApplication(project, region, app)
+		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Printf("App deployed to: %s\n", uri)
 	}
 }

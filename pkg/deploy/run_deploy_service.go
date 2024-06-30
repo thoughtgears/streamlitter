@@ -21,6 +21,11 @@ func (c *Client) DeployApplication(project, region string, app config.AppConfig)
 		fmt.Println("Service exists, updating service")
 	case false:
 		fmt.Println("Service does not exist, creating service")
+		uri, err := c.createService(app)
+		if err != nil {
+			return "", fmt.Errorf("createService(): %w", err)
+		}
+		return uri, nil
 	}
 
 	return "", nil
