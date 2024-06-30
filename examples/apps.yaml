@@ -1,3 +1,10 @@
 apps:
   - name: data-crusher # Required, must be unique
+    description: A simple data-crusher app # Optional
+    image: data-crusher # Optional, defaults to name
     public: false # Defaults to false
+    version: v1 # Optional, will become suffix for run service
+    scaling:
+      min: 0 # Optional, defaults to 0
+      max: 1 # Optional, defaults to 1
+      concurrency: 1 # Optional, defaults to 80

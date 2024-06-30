@@ -20,8 +20,19 @@ type Config struct {
 // It should contain all the information needed to deploy a single
 // streamlit app to Google Cloud run.
 type AppConfig struct {
-	Name   string `yaml:"name"`
-	Public bool   `yaml:"public,omitempty"`
+	Name         string `yaml:"name"`
+	Description  string `yaml:"description,omitempty"`
+	Public       bool   `yaml:"public,omitempty"`
+	Image        string `yaml:"image,omitempty"`
+	fullImageURL string
+	Version      string     `yaml:"version,omitempty"`
+	Scaling      AppScaling `yaml:"scaling,omitempty"`
+}
+
+type AppScaling struct {
+	Min         int32 `yaml:"min,omitempty"`
+	Max         int32 `yaml:"max,omitempty"`
+	Concurrency int32 `yaml:"concurrency,omitempty"`
 }
 
 func NewConfig(project, region, repo, filePath string) (Config, error) {
@@ -59,6 +70,22 @@ func (c *Config) parseAppConfig(filePath string) error {
 func (c *Config) parseYamlFile(data []byte) error {
 	if err := yaml.Unmarshal(data, &c); err != nil {
 		return fmt.Errorf("failed to unmarshal YAML: %w", err)
+	}
+
+	// Set default values for certain fields in the app configs
+	for i, app := range c.Apps {
+		if app.Image == "" {
+			c.Apps[i].Image = app.Name
+		}
+		c.Apps[i].fullImageURL = fmt.Sprintf("%s-docker.pkg.dev/%s/%s/%s", c.Region, c.Project, c.ArtifactRegistryName, app.Image)
+
+		if app.Scaling.Max == 0 {
+			c.Apps[i].Scaling.Max = 1
+		}
+
+		if app.Scaling.Concurrency == 0 {
+			c.Apps[i].Scaling.Concurrency = 80
+		}
 	}
 
 	if err := c.validate(); err != nil {

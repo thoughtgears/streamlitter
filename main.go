@@ -18,6 +18,8 @@ var (
 	credentialsFile string
 	repository      string
 	debug           bool
+	version         bool
+	Version         string
 )
 
 func init() {
@@ -27,7 +29,13 @@ func init() {
 	flag.StringVar(&repository, "repository", "", "Artifact Registry Repository")
 	flag.StringVar(&credentialsFile, "credentials-file", "", "Google JSON key file")
 	flag.BoolVar(&debug, "debug", false, "For debug purposes only")
+	flag.BoolVar(&version, "version", false, "Display app version")
 	flag.Parse()
+
+	if version {
+		fmt.Printf("Version: %s\n", Version)
+		os.Exit(0)
+	}
 
 	if project == "" {
 		project = os.Getenv("GPC_PROJECT_ID")
@@ -62,7 +70,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := clients.ArtifactRegistryVerify(context.TODO(), repository); err != nil {
+	if err := clients.VerifyRepository(context.TODO(), repository); err != nil {
 		log.Fatal(err)
+	}
+
+	for _, app := range cfg.Apps {
+		clients.DeployApplication(app.Name, app.Version, app.Public)
 	}
 }

@@ -11,7 +11,7 @@ import (
 	"cloud.google.com/go/artifactregistry/apiv1/artifactregistrypb"
 )
 
-func (c *client) ArtifactRegistryVerify(ctx context.Context, registryName string) error {
+func (c *Client) VerifyRepository(ctx context.Context, registryName string) error {
 	request := &artifactregistrypb.GetRepositoryRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/repositories/%s", c.project, c.region, registryName),
 	}

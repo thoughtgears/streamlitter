@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,9 +17,17 @@ func TestParse_Yaml(t *testing.T) {
 	data := `
 apps:
   - name: "app1"
+    description: "test app"
     public: false
+    image: "test"
+    version: "v1"
+    scaling:
+      min: 1
+      max: 10
+      concurrency: 5
   - name: "app2"
     public: true
+
 `
 
 	err := c.parseYamlFile([]byte(data))
@@ -26,6 +35,13 @@ apps:
 	assert.Equal(t, 2, len(c.Apps))
 	assert.Equal(t, "app1", c.Apps[0].Name)
 	assert.False(t, c.Apps[0].Public)
+	assert.Equal(t, "test", c.Apps[0].Image)
+	assert.Equal(t, "v1", c.Apps[0].Version)
+	assert.Equal(t, 1, c.Apps[0].Scaling.Min)
+	assert.Equal(t, 10, c.Apps[0].Scaling.Max)
+	assert.Equal(t, 5, c.Apps[0].Scaling.Concurrency)
+	assert.Equal(t, c.Apps[0].fullImageURL, fmt.Sprintf("%s-docker.pkg.dev/%s/%s/%s", c.Region, c.Project, c.ArtifactRegistryName, c.Apps[0].Image))
+
 	assert.Equal(t, "app2", c.Apps[1].Name)
 	assert.True(t, c.Apps[1].Public)
 }
