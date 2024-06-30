@@ -13,4 +13,4 @@ repos:
         name: Check bundle packages
         entry: .scripts/pre-commit-bundle-check.sh
         language: script
-        files: ^bin/
+        files: ^bin/*
