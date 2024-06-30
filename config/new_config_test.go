@@ -17,7 +17,6 @@ func TestParse_Yaml(t *testing.T) {
 	data := `
 apps:
   - name: "app1"
-    description: "test app"
     public: false
     image: "test"
     version: "v1"
@@ -41,7 +40,7 @@ apps:
 	assert.Equal(t, int32(1), c.Apps[0].Scaling.Min)
 	assert.Equal(t, int32(10), c.Apps[0].Scaling.Max)
 	assert.Equal(t, int32(5), c.Apps[0].Scaling.Concurrency)
-	assert.Equal(t, c.Apps[0].ImageURL, fmt.Sprintf("%s-docker.pkg.dev/%s/%s/%s", c.Region, c.Project, c.ArtifactRegistryName, c.Apps[0].Image))
+	assert.Equal(t, fmt.Sprintf("%s-docker.pkg.dev/%s/%s/%s:%s", c.Region, c.Project, c.ArtifactRegistryName, c.Apps[0].Image, c.Apps[0].ImageTag), c.Apps[0].ImageURL)
 	assert.Equal(t, "app1-v1", c.Apps[0].ServiceName)
 
 	assert.Equal(t, "app2", c.Apps[1].Name)

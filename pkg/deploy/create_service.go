@@ -38,7 +38,6 @@ func (c *Client) createService(app config.AppConfig) (string, error) {
 		Parent:    fmt.Sprintf("projects/%s/locations/%s", c.project, c.region),
 		ServiceId: service,
 		Service: &runpb.Service{
-			Description: app.Description,
 			Labels: map[string]string{
 				"streamlitter": "true",
 			},
@@ -79,8 +78,6 @@ func (c *Client) createService(app config.AppConfig) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("op.Wait(): %w", err)
 	}
-
-	fmt.Println(resp.Template)
 
 	return resp.Uri, nil
 }

@@ -19,13 +19,20 @@ func (c *Client) DeployApplication(project, region string, app config.AppConfig)
 	switch exists {
 	case true:
 		fmt.Println("Service exists, updating service")
+		revision, err := c.updateService(app)
+		if err != nil {
+			return "", fmt.Errorf("updateService(): %w", err)
+		}
+
+		return fmt.Sprintf("Updated service with revision %s", revision), nil
 	case false:
 		fmt.Println("Service does not exist, creating service")
 		uri, err := c.createService(app)
 		if err != nil {
 			return "", fmt.Errorf("createService(): %w", err)
 		}
-		return uri, nil
+
+		return fmt.Sprintf("Created service on %s", uri), nil
 	}
 
 	return "", nil

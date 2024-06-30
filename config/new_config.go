@@ -27,9 +27,9 @@ type Config struct {
 // streamlit app to Google Cloud run.
 type AppConfig struct {
 	Name        string     `yaml:"name"`
-	Description string     `yaml:"description,omitempty"`
 	Public      bool       `yaml:"public,omitempty"`
 	Image       string     `yaml:"image,omitempty"`
+	ImageTag    string     `yaml:"image-tag,omitempty"`
 	Version     string     `yaml:"version,omitempty"`
 	Scaling     AppScaling `yaml:"scaling,omitempty"`
 	Limits      AppLimits  `yaml:"limits,omitempty"`
@@ -93,10 +93,16 @@ func (c *Config) parseYamlFile(data []byte) error {
 
 	// Set default values for certain fields in the app configs
 	for idx, app := range c.Apps {
+		var imageTag = app.ImageTag
+		if app.ImageTag == "" {
+			c.Apps[idx].ImageTag = "latest"
+			imageTag = "latest"
+		}
+
 		if app.Image == "" {
 			c.Apps[idx].Image = app.Name
 		}
-		c.Apps[idx].ImageURL = fmt.Sprintf("%s-docker.pkg.dev/%s/%s/%s", c.Region, c.Project, c.ArtifactRegistryName, app.Image)
+		c.Apps[idx].ImageURL = fmt.Sprintf("%s-docker.pkg.dev/%s/%s/%s:%s", c.Region, c.Project, c.ArtifactRegistryName, app.Image, imageTag)
 
 		if app.Scaling.Max == 0 {
 			c.Apps[idx].Scaling.Max = defaultScalingMax
