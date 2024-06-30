@@ -29,10 +29,10 @@ build: clean
 
 bundle: build
 	@mkdir -p bin
-	@cp builds/$(SERVICE_NAME)-linux-amd64 bin/main-linux-amd64-$(VERSION)-$(GIT_COMMIT)
-	@cp builds/$(SERVICE_NAME)-linux-arm64 bin/main-linux-arm64-$(VERSION)-$(GIT_COMMIT)
-	@cp builds/$(SERVICE_NAME)-darwin-amd64 bin/main-darwin-amd64-$(VERSION)-$(GIT_COMMIT)
-	@cp builds/$(SERVICE_NAME)-darwin-arm64 bin/main-darwin-arm64-$(VERSION)-$(GIT_COMMIT)
+	@cp builds/$(SERVICE_NAME)-linux-amd64 bin/main-linux-amd64-$(VERSION)
+	@cp builds/$(SERVICE_NAME)-linux-arm64 bin/main-linux-arm64-$(VERSION)
+	@cp builds/$(SERVICE_NAME)-darwin-amd64 bin/main-darwin-amd64-$(VERSION)
+	@cp builds/$(SERVICE_NAME)-darwin-arm64 bin/main-darwin-arm64-$(VERSION)
 
 	@git add bin/*
 	@git commit -m "Bundling version $(VERSION) on commit $(GIT_COMMIT)"

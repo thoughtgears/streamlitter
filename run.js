@@ -14,30 +14,21 @@ try {
     process.exit(1);
 }
 
-const GIT_SHA = childProcess.exec('git rev-parse --short HEAD', (err, stdout, stderr) => {
-    if (err) {
-        console.error(`Error getting Git SHA: ${stderr}`);
-        process.exit(1);
-    }
-    console.log(`Current Git SHA: ${stdout.trim()}`);
-});
-
-
 function chooseBinary() {
     const platform = os.platform()
     const arch = os.arch()
 
     if (platform === 'linux' && arch === 'x64') {
-        return `main-linux-amd64-${VERSION}-${GIT_SHA}`
+        return `main-linux-amd64-${VERSION}`
     }
     if (platform === 'linux' && arch === 'arm64') {
-        return `main-linux-arm64-${VERSION}-${GIT_SHA}`
+        return `main-linux-arm64-${VERSION}`
     }
     if (platform === 'darwin' && arch === 'x64') {
-        return `main-darwin-amd64-${VERSION}-${GIT_SHA}`
+        return `main-darwin-amd64-${VERSION}`
     }
     if (platform === 'darwin' && arch === 'arm64') {
-        return `main-darwin-arm64-${VERSION}-${GIT_SHA}`
+        return `main-darwin-arm64-${VERSION}`
     }
 
     console.error(`Unsupported platform (${platform}) and architecture (${arch})`)
