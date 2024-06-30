@@ -1,0 +1,68 @@
+package main
+
+import (
+	"context"
+	"flag"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/thoughtgears/streamlit-hoster/config"
+	"github.com/thoughtgears/streamlit-hoster/pkg/deploy"
+)
+
+var (
+	filePath        string
+	region          string
+	project         string
+	credentialsFile string
+	repository      string
+	debug           bool
+)
+
+func init() {
+	flag.StringVar(&filePath, "file-path", "apps.yaml", "Path to the configuration file")
+	flag.StringVar(&region, "region", "europe-west1", "GCP Region")
+	flag.StringVar(&project, "project", "", "GCP Project")
+	flag.StringVar(&repository, "repository", "", "Artifact Registry Repository")
+	flag.StringVar(&credentialsFile, "credentials-file", "", "Google JSON key file")
+	flag.BoolVar(&debug, "debug", false, "For debug purposes only")
+	flag.Parse()
+
+	if project == "" {
+		project = os.Getenv("GPC_PROJECT_ID")
+	}
+
+	if region == "" {
+		region = os.Getenv("GPC_REGION")
+	}
+
+	if repository == "" {
+		repository = os.Getenv("REPO_NAME")
+	}
+}
+
+func main() {
+	cfg, err := config.NewConfig(project, region, repository, filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if debug {
+		fmt.Println("GCP config")
+		fmt.Printf("  Project: %s\n  Region: %s\n  Repo: %s\n", cfg.Project, cfg.Region, cfg.ArtifactRegistryName)
+		fmt.Println("App Configs:")
+		for _, app := range cfg.Apps {
+			fmt.Printf("  Name: %s\n  Public App: %v\n\n", app.Name, app.Public)
+		}
+	}
+
+	clients, err := deploy.NewClient(project, region, credentialsFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := clients.ArtifactRegistryVerify(context.TODO(), repository); err != nil {
+		log.Fatal(err)
+	}
+}

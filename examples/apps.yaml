@@ -1,0 +1,3 @@
+apps:
+  - name: data-crusher # Required, must be unique
+    public: false # Defaults to false
