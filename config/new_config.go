@@ -1,10 +1,16 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
+)
+
+const (
+	defaultScalingMax  = 1
+	defaultConcurrency = 80
 )
 
 // Config represents the configuration for the deployment.
@@ -80,17 +86,16 @@ func (c *Config) parseYamlFile(data []byte) error {
 		c.Apps[i].fullImageURL = fmt.Sprintf("%s-docker.pkg.dev/%s/%s/%s", c.Region, c.Project, c.ArtifactRegistryName, app.Image)
 
 		if app.Scaling.Max == 0 {
-			c.Apps[i].Scaling.Max = 1
+			c.Apps[i].Scaling.Max = defaultScalingMax
 		}
 
 		if app.Scaling.Concurrency == 0 {
-			c.Apps[i].Scaling.Concurrency = 80
+			c.Apps[i].Scaling.Concurrency = defaultConcurrency
 		}
 	}
 
 	if err := c.validate(); err != nil {
 		return fmt.Errorf("validate(): %w", err)
-
 	}
 
 	return nil
@@ -99,16 +104,16 @@ func (c *Config) parseYamlFile(data []byte) error {
 // validate checks the configuration for any missing or invalid fields.
 func (c *Config) validate() error {
 	if len(c.Apps) == 0 {
-		return fmt.Errorf("at least one app must be defined")
+		return errors.New("at least one app must be defined")
 	}
 
 	appNames := make(map[string]bool)
 	for _, app := range c.Apps {
 		if app.Name == "" {
-			return fmt.Errorf("app name is a required field")
+			return errors.New("app name is a required field")
 		}
 		if appNames[app.Name] {
-			return fmt.Errorf("app names must be unique")
+			return errors.New("app names must be unique")
 		}
 		appNames[app.Name] = true
 	}

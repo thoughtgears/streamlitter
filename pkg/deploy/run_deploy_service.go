@@ -11,12 +11,12 @@ import (
 )
 
 func (c *Client) DeployApplication(appName, version string, public bool) {
-	if c.serviceExists(appName) {
+	switch c.serviceExists(appName) {
+	case true:
 		// update service
-	} else {
+	case false:
 		// create service
 	}
-
 }
 
 func (c *Client) serviceExists(serviceName string) bool {
